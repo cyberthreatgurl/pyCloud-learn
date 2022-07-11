@@ -1,0 +1,176 @@
+Kelly Shaw (cyberintelgurl@gmail.com)
+Version 3 Design Document
+
+Goal:
+As designed in Versions 1 and 2, this program consists of a client and a server (cloud_client.py and cloud_server.py) and associated account management program (build_userDB.py).  The goal for project 3 is to upgrade this basic cloud server and client program.  These upgrades include, but are not limited to, support for the synchronization of user files from different “computers”.
+
+Solution:
+In order to satisfy the requirements of “automatic file synchronization”, the menu was removed from the client program.  The client is intended to run in a periodic fashion.  For the sake of demonstration, a period of 5 seconds was chosen to be the cycle time for the client program.  This can be easily changed in the code, or added as a parameter.
+
+The client program  now checks three different states to determine if files need to be uploaded, downloaded or deleted.
+1. Client File State –  a check is performed to see what has been deleted from the local server. If a file was deleted from the local client, it needs to be deleted from the server.
+
+2. Server File State – a check is performed to see what has been deleted from the server. If a file has been deleted from the server, it needs to be deleted from all clients.
+
+3. Client/Server File State – a check is performed to see what has been added or updated locally. I check is made to determine whether an updated or new file needs to be send to the client or the server.
+
+The server simply responds to client requests without storing permanent transaction files.   The client handles decisions as to whether files needs to be updated, added or deleted.  Propagation of these changes to other clients who may be offline is handled.
+
+Concerns:
+1. Although the client subdirectory will be auto-created on the server if it doesn’t exist, this means that any files that the client may have for that particular user will be deleted.   The point to understand is that the server is authoritative with regards to this particular state.   The opposite scheme works as expected. I.e – if the client is substantiated on a new computer, it’s files will be downloaded from the server.
+
+2. Because I do not require the server to track “client IDs” (or session IDs), there is a possibility that the server will try to read from the server state file (for a particular client) and find that the file is being written to by another client (for the same username) and, thus, cause an error for the client’s read.    Follow-on versions may necessitate that the clientID be used to differentiate between username_filestate_server.bin files on the server.
+
+3. Because I removed the menu function and chose to allow the user (client) to assign their own Client ID, there is a possibility for “collisions” in which the same client and ID are running on different computers.  It is understood that in the real world, this would not be prudent, but for the purposes of this assignment, not much time was spent in ensuring that collisions were not possible with regards to the Client ID. 
+
+4. Because the requirements did not specify the handling of internal subdirectories, this functionality was not tested or designed to.
+
+5. In order to make the most use of this program, it is understood that certificates should be created that allow computers other than localhost to participate.
+
+Program Execution:
+
+To execute this program, it is less confusing if two directories are created.  The names of the directories should  be “server” and “client”.    In real world situations, it is obvious that the server and the client would be run from different computers. However, due to security concerns, ports 5000-5100 were not accessible from external locations on the stu.cs.jmu.edu server.
+
+Once these individual folders have been created, start the programs in order of “server” and then the “client”.   NOTE:  Please use PYTHON version 3 when executing these programs.
+
+For test purposes, here are some username/password pairs that you can use.
+elvisp/smitty123
+kellyshaw/kelly123
+
+These local folders should be auto-created (and then populated with appropriate files from the server) upon execution of the client.
+If you want to try other users, please execute the build_userDB.py program from the server folder. This program will allow users to be added and passwords to be changed.
+Sample executions for build_userDB.py and the client/server are shown below.
+
+
+Filename:	cloud_server.py
+Description:	Server program for the cloud server. 
+
+Instructions:	For this demonstration version, this server should be executed from "localhost".
+
+Requirements:	Must have the localhost.pem file in the same directory as the server. Must have write permissions to create the username folders and user_db file. 
+
+Notes:		The localhost.pem file is a sample file and works ONLY on localhost.
+
+kshaw@ubuntu:~/work/proj3/server$ ./cloud_server.py
+starting up on localhost port 5077
+waiting for a connection...
+Connection from: 127.0.0.1:40992
+
+Authenticated username: elvisp
+Received: elvisp_22_filestate_client.bin from elvisp
+
+Authenticated username: elvisp
+Received: elvisp_22_filestate_client.bin from elvisp
+
+Authenticated username: elvisp
+Received: elvisp_22_filestate_client.bin from elvisp
+
+downloadfromserver:  username: elvisp
+Sent  elvisp_filestate_server.bin (296 bytes) to elvisp
+
+Authenticated username: elvisp
+Received: elvisp/silly.pdf from elvisp
+
+Received file delete request from elvisp for elvisp/ss.pdf
+Authenticated username: elvisp
+Received: elvisp_22_filestate_client.bin from elvisp
+
+downloadfromserver:  username: elvisp
+Sent  elvisp_filestate_server.bin (299 bytes) to elvisp
+
+Authenticated username: elvisp
+Received: elvisp_22_filestate_client.bin from elvisp
+
+downloadfromserver:  username: elvisp
+Sent  elvisp_filestate_server.bin (299 bytes) to elvisp
+
+
+
+
+
+Filename:      cloud_client.py
+Description:   Client program to access the cloud server.  
+
+Instructions:  For this demonstration version, this client should be executed from "localhost".
+
+Requirements:  Must have the ca.crt file in the same directory as the client
+
+Notes:         The ca.crt file is a sample file and works ONLY on localhost.
+
+
+
+kshaw@ubuntu:~/work/proj3/client$ ./cloud_client.py -u elvisp -p smitty123 -c 22
+
+User: elvisp logged in.
+Sent elvisp_22_filestate_client.bin to the server.
+
+User: elvisp logged in.
+Sent elvisp_22_filestate_client.bin to the server.
+Received: elvisp_filestate_server.bin (296 bytes) from elvisp
+
+
+User: elvisp logged in.
+Sent elvisp_22_filestate_client.bin to the server.
+Received: elvisp_filestate_server.bin (296 bytes) from elvisp
+
+
+User: elvisp logged in.
+Sent elvisp_22_filestate_client.bin to the server.
+Received: elvisp_filestate_server.bin (296 bytes) from elvisp
+
+<<Send on_server_not_client command for:>>silly.pdf
+
+User: elvisp logged in.
+Sent elvisp_22_filestate_client.bin to the server.
+Received: elvisp_filestate_server.bin (296 bytes) from elvisp
+
+Upload to server: silly.pdf
+
+User: elvisp logged in.
+Sent elvisp/silly.pdf to the server.
+Send delete from server command for: ss.pdf
+
+User: elvisp logged in.
+
+User: elvisp logged in.
+Sent elvisp_22_filestate_client.bin to the server.
+Received: elvisp_filestate_server.bin (299 bytes) from elvisp
+
+>>Send on_server_not_client command for:<<silly.pdf
+File deleted from the server: ss.pdf
+
+User: elvisp logged in.
+Sent elvisp_22_filestate_client.bin to the server.
+Received: elvisp_filestate_server.bin (299 bytes) from elvisp
+
+
+
+
+Filename:      build_userDB.py
+Description:   Tool to build user and password file.
+
+Instructions:  Must be executed from the "server" folder.  It will auto create the user_db file and add/update usernames and passwords.
+
+shawak@student:~/CS-610/proj2/server$ python3 build_userDB.py 
+User Name: tommy
+Password: tommy123
+New User created.
+Error:  Directory for existing user tommy does not exist.
+Directory tommy created.
+shawak@student:~/CS-610/proj2/server$ more user_db 
+tommy:b0deadd226a3335fcb925a5bdf2466e0963015374f32a1aac95de9ad
+shawak@student:~/CS-610/proj2/server$ python3 build_userDB.py 
+
+Cloud User Admin Tool
+----------------------
+User Name: elvisp      
+Password: LoveMeTender1
+Username exists - password updated.
+shawak@student:~/CS-610/proj2/server$ more user_db
+tommy:b0deadd226a3335fcb925a5bdf2466e0963015374f32a1aac95de9ad
+elvisp:ac9f0d3e8ecd09a0caf75b79174675f7ca8576a284a1de5b00b48073
+
+
+
+
+

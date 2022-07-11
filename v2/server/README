@@ -1,0 +1,177 @@
+
+
+
+Filename:      build_userDB.py
+Description:   Tool to build user and password file.
+Instructions:  Must be executed from the "server" folder.  It will autocreate the
+               user_db file and add/update usernames and passwords.
+
+shawak@student:~/CS-610/proj2/server$ python3 build_userDB.py 
+User Name: tommy
+Password: tommy123
+New User created.
+Error:  Directory for existing user tommy does not exist.
+Directory tommy created.
+shawak@student:~/CS-610/proj2/server$ more user_db 
+tommy:b0deadd226a3335fcb925a5bdf2466e0963015374f32a1aac95de9ad
+shawak@student:~/CS-610/proj2/server$ 
+
+
+Filename:      cloud_server.py
+Description:   Server program for the cloud server. 
+Instructions:  For this demonstration version, this server should be executed from "localhost".
+Requirements:  
+               Must have the localhost.pem file in the same directory as the server.
+               Must have write permissions to create the username folders and user_db file.
+Notes:  
+               The localhost.pem file is a sample file and works ONLY on localhost.
+
+
+shawak@student:~/CS-610/proj2/server$ python3 cloud_server.py 
+starting up on localhost port 5077
+waiting for a connection...
+Connection from: 127.0.0.1:49697
+
+Authenticated username: tommy
+Authenticated username: tommy
+Received: tommy/NEWS.txt from tommy
+
+downloadfromserver: authenticated username: tommy
+Authenticated username: tommy
+Preparing to send:tommy/NEWS.txt
+Sent: tommy/NEWS.txt to tommy
+
+downloadfromserver: authenticated username: tommy
+Authenticated username: tommy
+Authenticated username: tommy
+Received: tommy/Scan.pdf from tommy
+
+downloadfromserver: authenticated username: tommy
+Authenticated username: tommy
+Preparing to send:tommy/Scan.pdf
+Sent: tommy/Scan.pdf to tommy
+
+Client is disconnected.
+
+
+Filename:      cloud_client.py
+Description:   Client program to access the cloud server.  
+Instructions:  For this demonstration version, this client should be executed from "localhost".
+Requirements:  
+               Must have the ca.crt file in the same directory as the client
+Notes:  
+               The ca.crt file is a sample file and works ONLY on localhost.
+
+
+
+shawak@student:~/CS-610/proj2/client$ python3 cloud_client.py 
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+0
+User Name: tommy
+Password: tommy123
+
+Authentication complete.
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+1
+File to upload: NEWS.txt
+
+Authentication complete.
+Filename:  NEWS.txt
+Finished sending file: NEWS.txt
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+2
+
+Authentication complete.
+File to download: 
+NEWS.txt
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+3
+Client Directory Listing: 
+a.pdf
+2014.pdf
+ca.crt
+cloud_client.py
+test.txt
+NEWS.txt
+Scan.pdf
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+2
+
+Authentication complete.
+File to download: 
+Scan.pdf
+File does not exist on the server!
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+1
+File to upload: Scan.pdf
+
+Authentication complete.
+Filename:  Scan.pdf
+Finished sending file: Scan.pdf
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+2
+
+Authentication complete.
+File to download: 
+Scan.pdf
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+9
+Shutting down client.
+
+

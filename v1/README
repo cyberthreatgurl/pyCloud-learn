@@ -1,0 +1,101 @@
+This is the text version of shaw_project_1_design.pdf
+
+September 27, 2015
+Kelly Shaw (cyberintelgurl@gmail.com)
+
+Goal:
+Build a file server that works over the network.  Ensure that it allows the user to upload and download files.  Make sure that if the file already exists on the server that it is overwritten. Also, ensure that an error is generated if the file does not exist on the server.
+
+Solution:
+This program consists of a client and a server (cloud_client.py and cloud_server.py).  In lieu of a full blown graphical user interface, a simple menu was implemented.  This allows the user to select the desired option and allows the user to upload or download files from/to the server.  
+Python was chosen because of the ease of implementation of socket communications.  Hence, the sockets library was used as well as the sys, os and time libraries.
+
+Concerns:
+File upload and download seems to be working just fine.  However, future implementations of this program will require the refinement of message handling.  Right now, partially due to luck and timing, the sendall and recv socket commands seem to be working fine.  But, a time.sleep() command was needed due to the overlapping of messages. In other words, the basic socket processing is not a protocol in and of itself. I need to allow a way to determine the length of message traffic so that processing may proceed when a command has been received.
+
+Program Execution:
+To execute this program, it is less confusing if two directories are created.  The names of the directories can be arbitrary, but for the sake of this example were chosen to be server and client.    In real world situations, it is obvious that the server and the client would be run from different computers. However, due to security concerns, ports 5000-5100 were not accessible from external locations on the stu.cs.jmu.edu server.
+
+Once these individual folders have been created, start the programs in order of server and then the client.   
+
+NOTE:  Please use PYTHON version 3 when executing these programs.
+
+For example, here is the server being instantiated from my local account
+
+shawak:~/project1/server$ python3 cloud_server.py 
+starting up on localhost port 5077
+waiting for a connection...
+
+And, here is a sample run of the cloud_client.py program.
+shawak:~/project1/client$ python3 cloud_client.py 
+
+Menu
+----
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+1
+File to upload: a.pdf
+Finished sending file: a.pdf
+
+Menu
+----
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+2
+File to download: 
+bd.dkdk
+File does not exist!
+
+Menu
+----
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+3  
+Client Directory Listing: 
+a.pdf
+cloud_client.py
+test.txt
+NEWS.txt
+Scan.pdf
+
+
+Menu
+----
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+2
+File to download: 
+2014.pdf
+
+Menu
+----
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+3
+Client Directory Listing: 
+a.pdf
+2014.pdf
+cloud_client.py
+test.txt
+NEWS.txt
+Scan.pdf
+
+Menu
+----
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+9
+Shutting down client. 
+shawak@student:~/project1/client$

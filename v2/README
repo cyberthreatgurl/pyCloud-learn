@@ -1,0 +1,232 @@
+Kelly Shaw (cyberintelgurl@gmail.com)
+Version 2 Design Document
+
+Goal:
+Upgrade the basic cloud server and client program that was designed in Project 1.  These upgrades 
+include, but are not limited to, support for an SSL connection to the server as well as multiple user 
+accounts.
+
+Solution:
+As designed in Version 1, this program consists of a client and a server (cloud_client.py and cloud_server.py). A  new program was built to handle the administration of the user and password database (build_userDB.py).  Several new Python modules were leveraged which include ssl, hashlib and shutil.  These new modules added functionality for the SSL (TLSv1.2), password hashing and some file 
+copy utilities.
+
+The server was built to require the client to authenticate for each and every command (except socket shutdown).  This password was hashed and sent from the client via the SSL (TLSv1.2) connection.  Once received, the server compared the hash against what is in the user_db file on the server.  
+
+Concerns:
+1.	Due to time constraints, no time was spent in generating SSL certificates.  Instead, sample certificates were used.   In this case, the sample self-signed, certificates were built by Brandon 
+Rhodes and used in the Foundations of Network Programming, Third Edition text. This is important to note because these certificates only work on “localhost” and are not set up for specific servers and hostnames.  I would have preferred to self-sign a certificate for use on the stu.cs.jmu.edu server, but past experience shows that the needed TCP ports were not accessible from off-site and I would have still been limited to “localhost”. It is understood that full trust is not maintained by using certificates from an unknown source, but these certificates served the purpose of showing that a TLSv1.2 session works with the existing code. 
+
+2.	Also, to verify proper encryption, I used Wireshark to inspect TCP/IP traffic.  I learned that a slight configuration change was needed to allow Wireshark to make note of the new port that I 
+chose for SSL traffic.  By default, Wireshark looks at port 443, but support for port 5077 was needed. 
+
+3.	Due to time constraints, this version of the Cloud server requires usernames and passwords to be between 6 and 15 characters in length.  There is also a requirement that these usernames 
+and passwords be “alphanumeric”.  Future support for special characters in the password is desirable. 
+
+4.	Also, no checking was performed on user directories to validate storage space allocations or permissions.  In the real world, it is expected that the server would control the allotment of hard drive space and manage folder permissions. 
+
+5.	There is no checking to ensure that the password file has proper permissions in order to prevent unwanted disclosure. This is planned for future updates.
+
+ 
+
+Program Execution:
+To execute this program, it is less confusing if two directories are created.  The names of the directories should  be “server” and “client”. In real world situations, it is obvious that the server and the client would be run from different computers. However, due to security concerns, ports 5000-5100 were not accessible from external locations on the stu.cs.jmu.edu server.
+
+Once these individual folders have been created, start the programs in order of “server” and then the “client”.   
+
+NOTE:  Please use PYTHON version 3 when executing these programs.
+
+
+Sample executions for build_userDB.py and the client/server are shown below.
+
+
+?
+Filename:      build_userDB.py
+Description:   Tool to build user and password file.
+
+Instructions:  Must be executed from the "server" folder.  It will auto 
+create the user_db file and add/update usernames and passwords.
+
+shawak:~/proj2/server$ python3 build_userDB.py 
+User Name: tommy
+Password: tommy123
+New User created.
+Error:  Directory for existing user tommy does not exist.
+Directory tommy created.
+shawak:~/proj2/server$ more user_db 
+tommy:b0deadd226a3335fcb925a5bdf2466e0963015374f32a1aac95de9ad
+shawak:~/proj2/server$ python3 build_userDB.py 
+
+Cloud User Admin Tool
+----------------------
+User Name: elvisp      
+Password: LoveMeTender1
+Username exists - password updated.
+shawak:~/proj2/server$ more user_db
+tommy:b0deadd226a3335fcb925a5bdf2466e0963015374f32a1aac95de9ad
+elvisp:ac9f0d3e8ecd09a0caf75b79174675f7ca8576a284a1de5b00b48073
+
+
+?
+Filename:	cloud_server.py
+Description:	Server program for the cloud server. 
+
+Instructions:	For this demonstration version, this server should be 
+executed from "localhost".
+
+Requirements:	Must have the localhost.pem file in the same directory as the 
+server. Must have write permissions to create the username folders and 
+user_db file. 
+
+Notes:		The localhost.pem file is a sample file and works ONLY on 
+localhost.
+
+
+shawak:~/proj2/server$ python3 cloud_server.py 
+starting up on localhost port 5077
+waiting for a connection...
+Connection from: 127.0.0.1:49697
+
+Authenticated username: tommy
+Authenticated username: tommy
+Received: tommy/NEWS.txt from tommy
+
+downloadfromserver: authenticated username: tommy
+Authenticated username: tommy
+Preparing to send:tommy/NEWS.txt
+Sent: tommy/NEWS.txt to tommy
+
+downloadfromserver: authenticated username: tommy
+Authenticated username: tommy
+Authenticated username: tommy
+Received: tommy/Scan.pdf from tommy
+
+downloadfromserver: authenticated username: tommy
+Authenticated username: tommy
+Preparing to send:tommy/Scan.pdf
+Sent: tommy/Scan.pdf to tommy
+
+Client is disconnected.
+
+
+?
+Filename:      cloud_client.py
+Description:   Client program to access the cloud server.  
+
+Instructions:  For this demonstration version, this client should be executed 
+from "localhost".
+
+Requirements:  Must have the ca.crt file in the same directory as the client
+
+Notes:         The ca.crt file is a sample file and works ONLY on localhost.
+
+
+
+shawak:~/proj2/client$ python3 cloud_client.py 
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+0
+User Name: tommy
+Password: tommy123
+
+Authentication complete.
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+1
+File to upload: NEWS.txt
+
+Authentication complete.
+Filename:  NEWS.txt
+Finished sending file: NEWS.txt
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+2
+
+Authentication complete.
+File to download: 
+NEWS.txt
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+3
+Client Directory Listing: 
+a.pdf
+2014.pdf
+ca.crt
+cloud_client.py
+test.txt
+NEWS.txt
+Scan.pdf
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+2
+
+Authentication complete.
+File to download: 
+Scan.pdf
+File does not exist on the server!
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+1
+File to upload: Scan.pdf
+
+Authentication complete.
+Filename:  Scan.pdf
+Finished sending file: Scan.pdf
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+2
+
+Authentication complete.
+File to download: 
+Scan.pdf
+
+Menu
+----
+0) Login
+1) Upload a File
+2) Download a File
+3) Local Directory Listing
+9) Exit
+9
+Shutting down client.
